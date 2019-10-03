@@ -1,44 +1,40 @@
 import React, { Component } from "react";
 import TaskItemComponent from "./TaskItemComponent";
 import * as Utils from "./Utils";
+import axios from "axios";
 import "./App.css";
-
-class Task {
-  constructor(name, done) {
-    this.id = Utils.randomInt(100, 10000000);
-    this.timestamp = new Date();
-    this.name = name;
-    this.done = done;
-  }
-}
 
 export default class App extends Component {
   constructor() {
     super();
 
     this.state = {
-      tasks: [
-        new Task("Ir a la peluquería", true),
-        new Task("Estudiar", false),
-        new Task("Comprar el pan", true),
-        new Task("Recoger al niño en el cole", false)
-      ],
+      tasks: [],
       newTask: ""
     };
+  }
+
+  componentDidMount() {
+    axios.get("http://localhost:3000/tasks").then(tasksFromBackend => {
+      this.setState({
+        ...this.state,
+        tasks: tasksFromBackend.data
+      });
+    });
   }
 
   addNewTask() {
     if (this.state.newTask === "") return;
 
-    let tasks = [...this.state.tasks];
-
-    tasks.unshift(new Task(this.state.newTask, false));
-
-    this.setState({
-      ...this.state,
-      tasks: tasks,
-      newTask: ""
-    });
+    axios
+      .post("http://localhost:3000/newTask", { name: this.state.newTask })
+      .then(tasksFromBackend => {
+        this.setState({
+          ...this.state,
+          tasks: tasksFromBackend.data,
+          newTask: ""
+        });
+      });
   }
 
   setNewTaskValue(e) {
@@ -53,16 +49,24 @@ export default class App extends Component {
     let tasks = [...this.state.tasks];
 
     // this finds the selected task to be modified
-    let taskToUpdateFromState = tasks.find(task => task.id === taskToUpdate.id);
+    let taskToUpdateFromState = tasks.find(task => task._id === taskToUpdate._id);
+    let newDoneState = !taskToUpdateFromState.done
 
-    // this inverts the done state of the object inside of the chosen task
-    taskToUpdateFromState.done = !taskToUpdateFromState.done;
+    let URL = `http://localhost:3000/task/${taskToUpdate._id}/done/${newDoneState}`
 
-    // this re-updates the state with updated object, hence updating the checkbox
-    this.setState({
-      ...this.state,
-      tasks: tasks
-    });
+    console.log(URL)
+
+    axios
+      .get(
+        URL
+      )
+      .then(allTasks => {
+        // this re-updates the state with updated object, hence updating the checkbox
+        this.setState({
+          ...this.state,
+          tasks: allTasks.data
+        });
+      });
   }
 
   render() {
@@ -90,7 +94,7 @@ export default class App extends Component {
                   .map(task => {
                     return (
                       <TaskItemComponent
-                        key={task.id}
+                        key={task._id}
                         task={task}
                         updateTaskValue={task => this.updateTaskValue(task)}
                       ></TaskItemComponent>
@@ -112,7 +116,7 @@ export default class App extends Component {
                   .map(task => {
                     return (
                       <TaskItemComponent
-                        key={task.id}
+                        key={task._id}
                         task={task}
                         updateTaskValue={task => this.updateTaskValue(task)}
                       ></TaskItemComponent>
@@ -123,10 +127,7 @@ export default class App extends Component {
           )}
 
           {this.state.tasks.filter(task => task.done).length === 0 && (
-            <h1>
-              All task are to be done
-           
-            </h1>
+            <h1>All task are to be done</h1>
           )}
         </div>
       </div>
