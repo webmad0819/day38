@@ -1,0 +1,51 @@
+.App {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.App .component {
+  padding: 20px;
+  border: 1px solid black;
+  min-height: 150px;
+  min-width: 300px;
+}
+
+.App h1 {
+  font-weight: bold;
+}
+
+.App span {
+  font-size: 14px;
+  color: white;
+}
+
+.App h1, .App button {
+  display: block;
+  padding: 10px;
+}
+
+.App button {
+  margin: 10px;
+  max-width: 150px;
+}
+
+.App .component-a {
+  background: red;
+}
+
+.App .component-b {
+  background: green;
+  display: flex;
+}
+
+.App .component-c {
+  background: blue;
+}
+
+.App .component-d {
+  background: grey;
+}
+
